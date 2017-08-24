@@ -1,0 +1,34 @@
+{"OntologyMappings": [
+    {
+        "key": "HasLienRecord",
+        "mappings": {"asserts": [{
+            "S": "$Person",
+            "P": "AE#hasLiens",
+            "O": "<value>"
+        }]}
+    },
+    {
+        "key": "HasBankruptcyRecord",
+        "mappings": {"asserts": [{
+            "S": "$Person",
+            "P": "AE#hasDeclaredBankruptcy",
+            "O": "<value>"
+        }]}
+    },
+    {
+        "key": "HasArrestRecord",
+        "mappings": {"asserts": [{
+            "S": "$Person",
+            "P": "AE#hasArrestRecord",
+            "O": "<value>"
+        }]}
+    },
+    {
+        "key": "HasCriminalRecord",
+        "mappings": {"asserts": [{
+            "S": "$Person",
+            "P": "AE#hasCriminalRecord",
+            "O": "<value>"
+        }]}
+    }
+]}

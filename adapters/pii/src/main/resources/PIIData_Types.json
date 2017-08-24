@@ -1,0 +1,6 @@
+{
+  "Lien" : {"true":"AE#UnknownLienReport", "false":"AE#NoLienReport"},
+  "Bankruptcy" : {"true":"AE#UnknownBankruptcyReport", "false":"AE#NoBankruptcyReport"},
+  "Arrest" : {"true":"AE#UnknownArrestRecord", "false":"AE#NoArrestRecord"},
+  "Criminal" : {"true":"AE#UnknownCriminalRecord", "false":"AE#NoCriminalRecord"}
+}

@@ -1,0 +1,127 @@
+{
+  "OntologyMappings": [
+    {
+      "mappings": {
+        "instances": {
+          "$TravelDistance": "sumo#LengthMeasure",
+          "$Travelling": "AE#Travelling"
+        }, 
+        "asserts": [
+          {
+            "P": "AE#hasDistance", 
+            "S": "$Path", 
+            "O": "$TravelDistance"
+          }, 
+          {
+            "P": "AE#numericValue", 
+            "S": "$TravelDistance", 
+            "O": "<value>"
+          }, 
+          {
+            "P": "AE#hasUnitOfMeasure", 
+            "S": "$TravelDistance", 
+            "O": "meters"
+          },
+          {
+            "P": "AE#hasPath", 
+            "S": "$Travelling", 
+            "O": "$Path"
+          }
+        ]
+      }, 
+      "key": "TotalTravelDistance"
+    }, 
+    {
+      "mappings": {
+        "instances": {}, 
+        "asserts": [
+          {
+            "P": "AE#hasLongitude", 
+            "S": "$EndRegion", 
+            "O": "<value>"
+          }
+        ]
+      }, 
+      "key": "EndLongitude"
+    }, 
+    {
+      "mappings": {
+        "instances": {
+          "$EndRegion": "sumo#Region"
+        }, 
+        "asserts": [
+          {
+            "P": "AE#hasEndRegion", 
+            "S": "$Path", 
+            "O": "$EndRegion"
+          }, 
+          {
+            "P": "AE#hasLatitude", 
+            "S": "$EndRegion", 
+            "O": "<value>"
+          }
+        ]
+      }, 
+      "key": "EndLatitude"
+    }, 
+    {
+      "mappings": {
+        "instances": {
+          "$TimeDuration": "sumo#TimeDuration"
+        }, 
+        "asserts": [
+          {
+            "P": "AE#hasExpectedTravelTime", 
+            "S": "$Path", 
+            "O": "$TimeDuration"
+          }, 
+          {
+            "P": "AE#numericValue", 
+            "S": "$TimeDuration", 
+            "O": "<value>"
+          }, 
+          {
+            "P": "AE#hasUnitOfMeasure", 
+            "S": "$TimeDuration", 
+            "O": "minutes"
+          }
+        ]
+      }, 
+      "key": "TotalTravelTime"
+    }, 
+    {
+      "mappings": {
+        "instances": {
+          "$StartRegion": "sumo#Region", 
+          "$Path": "sumo#TransitRoute"
+        }, 
+        "asserts": [
+          {
+            "P": "AE#hasStartRegion", 
+            "S": "$Path", 
+            "O": "$StartRegion"
+          }, 
+          {
+            "P": "AE#hasLatitude", 
+            "S": "$StartRegion", 
+            "O": "<value>"
+          }
+        ]
+      }, 
+      "key": "StartLatitude"
+    }, 
+    {
+      "mappings": {
+        "instances": {}, 
+        "asserts": [
+          {
+            "P": "AE#hasLongitude", 
+            "S": "$StartRegion", 
+            "O": "<value>"
+          }
+        ]
+      }, 
+      "key": "StartLongitude"
+    }
+  ]
+}

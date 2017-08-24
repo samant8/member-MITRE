@@ -1,0 +1,184 @@
+
+import java_cup.runtime.*;
+
+/* java -jar cup-0.11a.jar -parser FLogicParser f-logic.cup */
+
+/* Preliminaries to use the scanner.  */
+scan with {: return lexer.next_token(); :};
+
+parser code {:
+  FLogicLexer lexer;
+  FLogicDriver driver;
+
+	public FLogicParser(FLogicLexer lex, FLogicDriver dri) {
+    super(lex);
+		lexer = lex;
+		driver = dri;
+  }
+
+  public void report_error(String message, Object info) {
+		System.out.println(message);
+    if ( !(info instanceof Symbol) ) return;
+    Symbol symbol = (Symbol) info;
+    if ( symbol.left < 0 || symbol.right < 0 ) return;
+    System.out.println(" at line "+symbol.left+", column "+symbol.right);		
+  }
+
+:};
+
+/* Terminals (tokens returned by lexer). */
+
+terminal String  LINK;
+terminal String  PDEF_LINK;
+terminal         RETRACT;
+terminal         LESS_THAN;
+terminal         LESS_THAN_EQ;
+terminal         GREATER_THAN;
+terminal         GREATER_THAN_EQ;
+terminal         EQ;
+terminal         NE;
+terminal         AT;
+terminal String  VARIABLE;
+terminal String  ATTRIBUTE;
+terminal         SAMEAS;
+terminal         INSTANCEOF;
+terminal         DIRINSTANCEOF;
+terminal         SUBCLASSOF;
+terminal         SUBPROPERTYOF;
+terminal         DIRSUBCLASSOF;
+terminal         RULE_DECL;
+terminal         GOAL_DECL;
+terminal         PERIOD;
+terminal String  NOT;
+terminal String  ALPHA;
+terminal String  NAMESPACE;
+terminal String  STRING_LITERAL;
+terminal String  NUMBER;
+terminal         COMMA;
+terminal         SEMI_COLON;
+terminal         LEFT_BRACKET;
+terminal         RIGHT_BRACKET;
+terminal         LEFT_BRACES;
+terminal         RIGHT_BRACES;
+terminal         OPEN_PAREN;
+terminal         CLOSE_PAREN;
+terminal         COMMENT;
+terminal         SETOF;
+terminal         LENGTHOF;
+terminal         BAR;
+
+non terminal             stmt;
+non terminal             command;
+non terminal             comment;
+non terminal Expression  rule;
+non terminal Expression  goal;
+non terminal Expression  expression;
+non terminal Expression  expressions;
+non terminal Aggregate   aggregate;
+non terminal PredValue   predValue;
+non terminal PredValue   predValues;
+non terminal String      predExpr;
+non terminal String      value;
+non terminal String      pred;
+non terminal String      values;
+non terminal String      args;
+
+precedence left COMMA;
+precedence left SEMI_COLON;
+
+stmt ::= 
+		   | stmt rule PERIOD
+       | stmt goal PERIOD
+       | stmt command PERIOD
+       | stmt expression:e PERIOD {: if(e.getPreds().getType().contains("->")) parser.driver.addAssertion(e);
+                                     else parser.driver.addPredicate(e); :}
+       | stmt comment
+;
+
+comment     ::= COMMENT
+;
+
+rule        ::= expression:e RULE_DECL expressions:s {: parser.driver.createNewRule(e, s); :}
+              | expression:e RULE_DECL               {: parser.driver.createNewRule(e, null); :}
+;
+
+goal        ::= GOAL_DECL expressions:e {: parser.driver.createNewGoal(e); :}
+;
+
+command     ::= RETRACT expression:e {: parser.driver.delAssertion(e); :}
+;
+
+expressions ::= expression:e                     {: RESULT = e; :}
+              | expressions:s COMMA expression:e {: parser.driver.addExpression(s, e); RESULT = s; :}
+;
+
+expression  ::= value:s INSTANCEOF value:o       {: RESULT = parser.driver.createNewExpression(s, ":", o); :}
+              | value:s DIRINSTANCEOF value:o    {: RESULT = parser.driver.createNewExpression(s, "<:", o); :}
+              | value:s SUBCLASSOF value:o       {: RESULT = parser.driver.createNewExpression(s, "::", o); :}
+              | value:s SUBPROPERTYOF value:o    {: RESULT = parser.driver.createNewExpression(s, ":->:", o); :}
+              | value:s DIRSUBCLASSOF value:o    {: RESULT = parser.driver.createNewExpression(s, "<::", o); :}
+              | value:s SAMEAS value:o           {: RESULT = parser.driver.createNewExpression(s, ":=:", o); :}
+              | value:s NE value:o               {: RESULT = parser.driver.createNewExpression(s, "!=", o); :}
+              | value:s EQ value:o               {: RESULT = parser.driver.createNewExpression(s, "==", o); :}
+              | value:s LESS_THAN_EQ value:o     {: RESULT = parser.driver.createNewExpression(s, "=<", o); :}
+              | value:s LESS_THAN value:o        {: RESULT = parser.driver.createNewExpression(s, "<", o); :}
+              | value:s GREATER_THAN_EQ value:o  {: RESULT = parser.driver.createNewExpression(s, ">=", o); :}
+              | value:s GREATER_THAN value:o     {: RESULT = parser.driver.createNewExpression(s, ">", o); :}
+              | value:s LEFT_BRACKET aggregate:a RIGHT_BRACKET 
+                                                 {: RESULT = parser.driver.createNewExpression(s, a); :}
+              | value:s LEFT_BRACKET predValues:p RIGHT_BRACKET 
+                                                 {: RESULT = parser.driver.createNewExpression(s, p); :}
+              | expression:e AT ALPHA:a          {: e.setGraph(a); RESULT = e; :}
+              | expression:e AT VARIABLE:v       {: e.setGraph(v); RESULT = e; :}
+;
+
+aggregate ::= SETOF LINK LEFT_BRACES VARIABLE:v BAR expressions:e RIGHT_BRACES 
+                                                 {: RESULT = parser.driver.createNewAggregate("setof", v, e); :}
+             | LENGTHOF LINK LEFT_BRACES VARIABLE:v BAR expressions:e RIGHT_BRACES 
+                                                 {: RESULT = parser.driver.createNewAggregate("lengthof", v, e); :}
+;
+
+predValues  ::= predValue:p {: RESULT = p; :}
+              | predValues:s COMMA predValue:v      {: RESULT = s; parser.driver.addConjunct(s, v); :}
+              | predValues:s SEMI_COLON predValue:v {: RESULT = s; parser.driver.addDisjunct(s, v); :}
+;
+
+predValue   ::= predExpr:p LINK:i value:v 
+                {: parser.driver.initArgs(v); RESULT = parser.driver.createNewPredValue(p, i); :}
+              | predExpr:p LINK:i LEFT_BRACES values RIGHT_BRACES
+                {: RESULT = parser.driver.createNewPredValue(p, i); :}
+              | predExpr:p PDEF_LINK:i value:v 
+                {: parser.driver.initArgs(v); RESULT = parser.driver.createNewPredValue(p, i); :}
+              | predExpr:p PDEF_LINK:i LEFT_BRACES values RIGHT_BRACES 
+                {: RESULT = parser.driver.createNewPredValue(p, i); :}
+;
+
+predExpr    ::= pred:p                             {: RESULT = p; :}
+              | pred:p OPEN_PAREN args CLOSE_PAREN {: RESULT = parser.driver.createPredExpr(p); :}
+;
+
+args        ::= value:v                   {: parser.driver.initArgs(v); :}
+              | ATTRIBUTE:a LINK value:v  {: parser.driver.initArgs(a+"->"+v); :}
+              | args COMMA value:v        {: parser.driver.addArg(v); :}
+              | args COMMA ATTRIBUTE:a LINK value:v {: parser.driver.addArg(a+"->"+v); :}
+;
+
+values      ::= value:v                   {: parser.driver.initArgs(v); :}
+              | values SEMI_COLON value:v {: parser.driver.addArg(v); :}
+;
+
+pred        ::= ALPHA:a              {: RESULT = a; :}
+              | NAMESPACE:n ALPHA:a  {: RESULT = n+a; :}
+              | VARIABLE:v           {: RESULT = v; :}
+;
+
+value       ::= ALPHA:a              {: RESULT = a; :}
+              | NAMESPACE:n ALPHA:a  {: RESULT = n+a; :}
+              | STRING_LITERAL:l     {: RESULT = l; :}
+              | NAMESPACE:n STRING_LITERAL:l     {: RESULT = n+l; :}
+              | VARIABLE:v           {: RESULT = v; :}
+              | ATTRIBUTE:v          {: RESULT = v; :}
+							| NUMBER:n						 {: RESULT = n; :}
+              | NOT ALPHA:a          {: RESULT = "~"+a; :}
+              | NOT VARIABLE:v       {: RESULT = "~"+v; :}
+;

@@ -1,0 +1,401 @@
+<!-- © 2015-2016 SRA International, Inc., a CSRA Company -->
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+
+  <xsd:attributeGroup name='offset'>
+    <xsd:attribute name='section'    type='xsd:string'      use='optional'/>
+    <xsd:attribute name='section-id' type='xsd:IDREF'       use='optional'/>
+    <xsd:attribute name='text-id'    type='xsd:IDREF'       use='optional'/>
+    <xsd:attribute name='head'       type='xsd:unsignedInt' use='optional'/>
+    <xsd:attribute name='tail'       type='xsd:unsignedInt' use='optional'/>
+  </xsd:attributeGroup>
+
+  <xsd:attributeGroup name='geo-atts'>
+    <xsd:attribute name='latitude'   type='xsd:decimal' use='required'/>
+    <xsd:attribute name='longitude'  type='xsd:decimal' use='required'/>
+    <xsd:attribute name='confidence' type='xsd:decimal' use='required'/>
+  </xsd:attributeGroup>
+
+  <xsd:attributeGroup name='link-arg-atts'>
+    <xsd:attribute name='role'      type='xsd:string' use='required'/>
+    <xsd:attribute name='role-type' type='xsd:string' use='optional'/>
+    <xsd:attribute name='ontology'  type='xsd:string' use='required'/>
+    <xsd:attribute name='idref'     type='xsd:IDREF'  use='required'/>
+  </xsd:attributeGroup>
+
+  <xsd:attributeGroup name='arg-atts'>
+    <xsd:attribute name='role'     type='xsd:string' use='required'/>
+    <xsd:attribute name='value'    type='xsd:string' use='required'/>
+    <xsd:attribute name='ontology' type='xsd:string' use='required'/>
+    <xsd:attribute name='idref'    type='xsd:IDREF' use='required'/>
+  </xsd:attributeGroup>
+
+  <xsd:element name='entity-arg-mention'>
+    <xsd:complexType>
+      <xsd:attribute name='type'       type='xsd:string' use='optional'/> <!-- links only -->
+      <xsd:attribute name='value'      type='xsd:string' use='required'/> <!-- links only -->
+      <xsd:attribute name='lang-en-us' type='xsd:string' use='optional'/>
+      <xsd:attributeGroup ref='offset'/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:group name='complexref'>
+    <xsd:sequence>
+      <xsd:element name='entity-arg' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element ref='entity-arg-mention' minOccurs='0' maxOccurs='1'/>
+            <xsd:element name='geodetic' minOccurs='0' maxOccurs='1'>
+              <xsd:complexType>
+                <xsd:attributeGroup ref='geo-atts'/>
+              </xsd:complexType>
+            </xsd:element>
+          </xsd:sequence>
+          <xsd:attributeGroup ref='arg-atts'/>
+          <xsd:attribute name='value-type' type='xsd:string' use='optional'/>
+          <xsd:attribute name='role-type'  type='xsd:string' use='optional'/> <!-- links only -->
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name='event-arg' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:attributeGroup ref='arg-atts'/>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name='sentiment-arg' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:attributeGroup ref='arg-atts'/>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:group>
+
+  <xsd:group name='basearg'>
+    <xsd:sequence>
+      
+      <xsd:element name='entity-ref' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:attributeGroup ref='arg-atts'/>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name='link-ref' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:group ref='complexref'/>
+          <xsd:attributeGroup ref='link-arg-atts'/>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name='event-ref' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:group ref='complexref'/>
+          <xsd:attributeGroup ref='arg-atts'/>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name='sentiment-ref' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:group ref='complexref'/>
+          <xsd:attributeGroup ref='arg-atts'/>
+        </xsd:complexType>
+      </xsd:element>
+
+    </xsd:sequence>
+  </xsd:group>
+
+  <xsd:group name='baseitem'>
+    <xsd:sequence>
+      <xsd:element name='entity-arg' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:group ref='basearg'/>
+            <xsd:element ref='entity-arg-mention' minOccurs='0' maxOccurs='1'/>
+            <xsd:element name='geodetic' minOccurs='0' maxOccurs='1'>
+              <xsd:complexType>
+                <xsd:attributeGroup ref='geo-atts'/>
+              </xsd:complexType>
+            </xsd:element>
+          </xsd:sequence>
+          <xsd:attributeGroup ref='arg-atts'/>
+          <xsd:attribute name='value-type' type='xsd:string' use='optional'/>
+          <xsd:attribute name='role-type' type='xsd:string' use='optional'/> <!-- links only -->
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name='event-arg' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:group ref='basearg'/>
+          <xsd:attributeGroup ref='arg-atts'/>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name='sentiment-arg' minOccurs='0' maxOccurs='unbounded'>
+        <xsd:complexType>
+          <xsd:group ref='basearg'/>
+          <xsd:attributeGroup ref='arg-atts'/>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:group>
+  
+  <xsd:group name='complexitem'>
+    <xsd:sequence>
+      <xsd:group ref='baseitem'/>
+      <xsd:element ref='property' minOccurs='0' maxOccurs='unbounded'/>
+      <xsd:element ref='score' minOccurs='0' maxOccurs='unbounded'/>
+      <xsd:group ref='basearg'/>
+    </xsd:sequence>
+  </xsd:group>
+  
+  <!--         
+    <score type='confidence' value='4'/>
+    <score type='sentiment' value='-1.24'/>
+   -->  
+  <xsd:element name='score'>
+    <xsd:complexType>
+      <xsd:attribute name='type'           type='xsd:string'  use='required'/>
+      <xsd:attribute name='value'          type='xsd:decimal' use='required'/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <!-- <property type='confidence' value='3'/>
+       <property type='date_of_foundation' value='1972' entity-id='269' section='body' head='265' tail='269'/> -->
+  <xsd:element name='property'>
+    <xsd:complexType>
+      <xsd:attribute name='name'      type='xsd:string'      use='required'/>
+      <xsd:attribute name='value'     type='xsd:string'      use='required'/>
+      <xsd:attributeGroup ref='offset'/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- <entity-value type='name' value='John Doggett' script='latin'/> -->
+  <xsd:element name='entity-value'>
+    <xsd:complexType>
+      <xsd:attribute name='type'       type='xsd:string' use='required'/>
+      <xsd:attribute name='subtype'    type='xsd:string' use='optional'/>
+      <xsd:attribute name='value'      type='xsd:string' use='required'/>
+      <xsd:attribute name='implies'    type='xsd:string' use='optional'/>
+      <xsd:attribute name='lang-en-us' type='xsd:string' use='optional'/>
+      <xsd:attribute name='script'     type='xsd:string' use='required'/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!--
+    <geodetic latitude='38.8951' longitude='-77.0364' confidence='0.0477'>
+      <property name='province' value='district of columbia'/>
+      <property name='country' value='united states'/>
+    </geodetic>
+  -->  
+  <xsd:element name='geodetic'>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref='property' minOccurs='0' maxOccurs='unbounded'/>
+        <xsd:element name='alternate' minOccurs='0' maxOccurs='unbounded'>
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element ref='property' minOccurs='0' maxOccurs='unbounded'/>
+            </xsd:sequence>
+            <xsd:attributeGroup ref='geo-atts'/>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+      <xsd:attributeGroup ref='geo-atts'/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name='content'>
+    <xsd:complexType>
+      <xsd:sequence>
+            
+        <!--
+          <process version='6.9.0.0'>
+            <warning message='entity was suppressed'/>
+          </process>
+        -->
+        <xsd:element name='process' minOccurs='0' maxOccurs='unbounded'>
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name='warning' minOccurs='0' maxOccurs='unbounded'>
+                <xsd:complexType>
+                  <xsd:attribute name='message' type='xsd:string' use='required'/>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name='version' type='xsd:string' use='required'/>
+          </xsd:complexType>
+        </xsd:element>
+            
+        <xsd:element name='document'>
+          <xsd:complexType>
+            <xsd:sequence>
+            
+              <!-- <text name='author' text-id='author#2'>Joe Smith</text> -->
+              <xsd:element name='text' minOccurs='0' maxOccurs='unbounded'>
+                <xsd:complexType>
+                  <xsd:simpleContent>
+                    <xsd:extension base='xsd:string'>
+                      <xsd:attribute name='name'    type='xsd:string' use='required'/>
+                      <xsd:attribute name='text-id' type='xsd:ID'     use='required'/>
+                    </xsd:extension>
+                  </xsd:simpleContent>
+                </xsd:complexType>
+              </xsd:element>
+            
+              <!-- <section name='author' metadata='Joe Smith' text-id='author#2' head='0' tail='9'/> -->
+              <xsd:element name='section' minOccurs='0' maxOccurs='unbounded'>
+                <xsd:complexType>
+                  <xsd:attribute name='id'            type='xsd:ID'     use='required'/>
+                  <xsd:attribute name='name'          type='xsd:string' use='required'/>
+                  <xsd:attribute name='metadata'      type='xsd:string' use='optional'/>
+                  <xsd:attribute name='identified-as' type='xsd:string' use='optional'/>
+                  <xsd:attribute name='processed-as'  type='xsd:string' use='optional'/>
+                  <xsd:attribute name='allowed-as'    type='xsd:string' use='optional'/>
+                  <xsd:attributeGroup ref='offset'/>
+                </xsd:complexType>
+              </xsd:element>
+      
+              <!--         
+                <categorization type='rule'>
+                  <category value='spain'>
+                    <property type='token evidence' value='Barcelona' head='475' tail='484'/>
+                    <property type='token evidence' value='Iberia' head='685' tail='691'/>
+                  </category>
+                </categorization>
+                <categorization type='learning' model='news'>
+                  <category value='BusinessFinance' score='0.015369'/>
+                </categorization>
+               -->  
+              <xsd:element name='categorization' minOccurs='0' maxOccurs='unbounded'>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name='category' minOccurs='0' maxOccurs='unbounded'>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element ref='property' minOccurs='0' maxOccurs='unbounded'/>
+                        </xsd:sequence>
+                        <xsd:attribute name='value' type='xsd:string'  use='required'/>
+                        <xsd:attribute name='score' type='xsd:decimal' use='optional'/>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                  <xsd:attribute name='type'       type='xsd:string'  use='required'/>
+                  <xsd:attribute name='model'      type='xsd:string'  use='optional'/>
+                  <xsd:attribute name='allowed-as' type='xsd:string'  use='optional'/>
+                </xsd:complexType>
+              </xsd:element>
+      
+              <!-- <entity ontology='entity:numeric:percent' value='8%' id='id670'>
+                   <entity ontology='entity:organization:company' value='XYZ Corporation' id='id687' resolve='xyz' value-rank='0'>
+               --> 
+              <xsd:element name='entity' minOccurs='0' maxOccurs='unbounded'>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element ref='entity-value' minOccurs='0' maxOccurs='unbounded'/>
+                    <xsd:group ref='baseitem'/>
+                    <xsd:element ref='property' minOccurs='0' maxOccurs='unbounded'/>
+                    <xsd:element ref='score'    minOccurs='0' maxOccurs='unbounded'/>
+                    <xsd:element ref='geodetic' minOccurs='0' maxOccurs='1'/>
+                    <xsd:group ref='basearg'/>
+      
+                    <xsd:element name='entity-mention' minOccurs='0' maxOccurs='unbounded'>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:group ref='baseitem'/>
+                          <xsd:element ref='property' minOccurs='0' maxOccurs='unbounded'/>
+                          <xsd:element ref='score'    minOccurs='0' maxOccurs='unbounded'/>
+                          <xsd:element ref='geodetic' minOccurs='0' maxOccurs='1'/>
+                          <xsd:group ref='basearg'/>
+                        </xsd:sequence>
+                        <xsd:attribute name='type'       type='xsd:string' use='optional'/>
+                        <xsd:attribute name='subtype'    type='xsd:string' use='optional'/>
+                        <xsd:attribute name='value'      type='xsd:string' use='required'/>
+                        <xsd:attribute name='implies'    type='xsd:string' use='optional'/>
+                        <xsd:attribute name='lang-en-us' type='xsd:string' use='optional'/>
+                        <xsd:attributeGroup ref='offset'/>
+                      </xsd:complexType>
+                    </xsd:element>
+      
+                  </xsd:sequence>
+                  <xsd:attribute name='ontology'   type='xsd:string' use='required'/>
+                  <xsd:attribute name='value'      type='xsd:string' use='required'/>
+                  <xsd:attribute name='id'         type='xsd:ID'     use='required'/>
+                  <xsd:attribute name='norm'       type='xsd:string' use='optional'/>
+                  <xsd:attribute name='value-type' type='xsd:string' use='optional'/>
+                  <xsd:attribute name='resolve'    type='xsd:string' use='optional'/>
+                  <xsd:attribute name='value-rank' type='xsd:byte'   use='optional'/>
+                </xsd:complexType>
+              </xsd:element>
+      
+              <!-- <link ontology='link:organization:org_founder' id='id570'> -->
+              <xsd:element name='link' minOccurs='0' maxOccurs='unbounded'>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:group ref='complexitem'/>
+      
+                    <xsd:element name='link-mention' minOccurs='0' maxOccurs='unbounded'>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:group ref='complexitem'/>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                  <xsd:attribute name='ontology'   type='xsd:string' use='required'/>
+                  <xsd:attribute name='id'         type='xsd:ID'     use='required'/>
+                </xsd:complexType>
+              </xsd:element>
+      
+              <!-- <event ontology='event:business:start_business' value='was founded' id='id656'> -->
+              <xsd:element name='event' minOccurs='0' maxOccurs='unbounded'>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:group ref='complexitem'/>
+      
+                    <xsd:element name='event-mention' minOccurs='0' maxOccurs='unbounded'>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:group ref='complexitem'/>
+                        </xsd:sequence>
+                        <xsd:attribute name='value'      type='xsd:string' use='required'/>
+                        <xsd:attributeGroup ref='offset'/>
+                      </xsd:complexType>
+                    </xsd:element>
+                    
+                  </xsd:sequence>
+                  <xsd:attribute name='ontology'   type='xsd:string' use='required'/>
+                  <xsd:attribute name='value'      type='xsd:string' use='required'/>
+                  <xsd:attribute name='id'         type='xsd:ID'     use='required'/>
+                </xsd:complexType>
+              </xsd:element>
+      
+              <!-- <sentiment ontology='sentiment:positive:praise:like' value='a smart move' id='id679'> -->
+              <xsd:element name='sentiment' minOccurs='0' maxOccurs='unbounded'>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:group ref='complexitem'/>
+      
+                    <xsd:element name='sentiment-mention' minOccurs='0' maxOccurs='unbounded'>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:group ref='complexitem'/>
+                        </xsd:sequence>
+                        <xsd:attribute name='value'      type='xsd:string' use='required'/>
+                        <xsd:attributeGroup ref='offset'/>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                  <xsd:attribute name='ontology'   type='xsd:string' use='required'/>
+                  <xsd:attribute name='value'      type='xsd:string' use='required'/>
+                  <xsd:attribute name='id'         type='xsd:ID'     use='required'/>
+                </xsd:complexType>
+              </xsd:element>
+      
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+</xsd:schema>

@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<content>
+  <process version='1.1'/>
+
+  <document>
+    <section id='s1' name='main' processed-as='english' allowed-as='english'/>
+    <section id='m2' name='title' metadata='NetOwl Application'/>
+
+    <entity ontology='entity:address:mail' value='1077 Cross Road,New York City,NY 12857' id='id1' value-type='name' resolve='1077_cross_road_new_york_city_ny' value-rank='50'>
+      <entity-value type='name' value='1077 Cross Road,New York City,NY 12857' script='latin'/>
+      <entity-arg role='street_number' value='1077' value-type='name' ontology='entity:address:street_number' idref='id5'/>
+      <entity-arg role='street_name' value='Cross Road' value-type='name' ontology='entity:place:roadway' idref='id13'/>
+      <entity-arg role='street' value='1077 Cross Road' value-type='name' ontology='entity:address:street' idref='id3'/>
+      <entity-arg role='city' value='New York City' value-type='name' ontology='entity:place:city' idref='id9'/>
+      <entity-arg role='state' value='NY' value-type='name' ontology='entity:place:province' idref='id11'/>
+      <entity-arg role='zip' value='12857' value-type='name' ontology='entity:address:zipcode' idref='id7'/>
+    </entity>
+
+    <entity ontology='entity:address:street' value='1077 Cross Road' id='id3' value-type='name'>
+      <entity-value type='name' value='1077 Cross Road' script='latin'/>
+      <entity-arg role='street_number' value='1077' value-type='name' ontology='entity:address:street_number' idref='id5'/>
+      <entity-arg role='street_name' value='Cross Road' value-type='name' ontology='entity:place:roadway' idref='id13'/>
+      <entity-ref role='street' value='1077 Cross Road,New York City,NY 12857' ontology='entity:address:mail' idref='id1'/>
+    </entity>
+
+    <entity ontology='entity:address:street_number' value='1077' id='id5' value-type='name'>
+      <entity-value type='name' value='1077' script='latin'/>
+      <entity-ref role='street_number' value='1077 Cross Road,New York City,NY 12857' ontology='entity:address:mail' idref='id1'/>
+      <entity-ref role='street_number' value='1077 Cross Road' ontology='entity:address:street' idref='id3'/>
+    </entity>
+
+    <entity ontology='entity:address:zipcode' value='12857' id='id7' value-type='name'>
+      <entity-value type='name' value='12857' script='latin'/>
+      <entity-ref role='zip' value='1077 Cross Road,New York City,NY 12857' ontology='entity:address:mail' idref='id1'/>
+    </entity>
+
+    <entity ontology='entity:place:city' value='New York City' norm='New York (New York, US)' id='id9' value-type='name' resolve='new_york_city|new york|us' value-rank='50'>
+      <entity-value type='name' value='New York City' script='latin'/>
+      <property name='fips_10_4_country' value='us'/>
+      <property name='iso_3166_1_country' value='us'/>
+      <property name='country' value='united states'/>
+      <property name='province' value='new york'/>
+      <geodetic latitude='40.7143' longitude='-74.006' confidence='0.9642'>
+        <property name='city' value='New York'/>
+        <property name='province' value='New York'/>
+        <property name='country' value='US'/>
+      </geodetic>
+      <entity-ref role='city' value='1077 Cross Road,New York City,NY 12857' ontology='entity:address:mail' idref='id1'/>
+      <link-ref role='place' role-type='source' ontology='link:place:place_parent' idref='id15'>
+        <entity-arg role='parent' role-type='target' value='NY' value-type='name' ontology='entity:place:province' idref='id11'/>
+      </link-ref>
+    </entity>
+
+    <entity ontology='entity:place:province' value='NY' norm='New York (US)' id='id11' value-type='name' resolve='us-ny|us' value-rank='50'>
+      <entity-value type='name' value='NY' script='latin'/>
+      <property name='fips_10_4_country' value='us'/>
+      <property name='iso_3166_1_country' value='us'/>
+      <property name='country' value='united states'/>
+      <property name='fips_10_4_province' value='us36'/>
+      <property name='iso_3166_2_province' value='us-ny'/>
+      <property name='province' value='new york'/>
+      <geodetic latitude='42.0547' longitude='-74.9314' confidence='1'>
+        <property name='province' value='New York'/>
+        <property name='country' value='US'/>
+      </geodetic>
+      <entity-ref role='state' value='1077 Cross Road,New York City,NY 12857' ontology='entity:address:mail' idref='id1'/>
+      <link-ref role='parent' role-type='target' ontology='link:place:place_parent' idref='id15'>
+        <entity-arg role='place' role-type='source' value='New York City' value-type='name' ontology='entity:place:city' idref='id9'/>
+      </link-ref>
+    </entity>
+
+    <entity ontology='entity:place:roadway' value='Cross Road' norm='Cross Road' id='id13' value-type='name'>
+      <entity-value type='name' value='Cross Road' script='latin'/>
+      <entity-ref role='street_name' value='1077 Cross Road,New York City,NY 12857' ontology='entity:address:mail' idref='id1'/>
+      <entity-ref role='street_name' value='1077 Cross Road' ontology='entity:address:street' idref='id3'/>
+    </entity>
+
+    <link ontology='link:place:place_parent' id='id15'>
+      <entity-arg role='place' role-type='source' value='New York City' value-type='name' ontology='entity:place:city' idref='id9'/>
+      <entity-arg role='parent' role-type='target' value='NY' value-type='name' ontology='entity:place:province' idref='id11'/>
+    </link>
+  </document>
+</content>

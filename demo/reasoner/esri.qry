@@ -1,0 +1,1 @@
+?- ?T:AE#Travelling, ?V:AE#VATravelVoucher, ?V[AE#hasVoucherTravel->?T], ?T[AE#hasDestination->?destination], ?destination[label->?destL], ?T[AE#hasOrigin->?origin], ?origin[label->?originL].

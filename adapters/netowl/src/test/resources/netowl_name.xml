@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<content>
+  <process version='1.1'/>
+
+  <document>
+    <section id='s1' name='main' processed-as='english' allowed-as='english'/>
+    <section id='m2' name='title' metadata='NetOwl Application'/>
+
+    <entity ontology='entity:person' value='Jessica Beryl Browning' norm='Jessica Beryl Browning' id='id1' value-type='name'>
+      <entity-value type='name' value='Jessica' script='latin'/>
+      <property name='firstname' value='jessica'/>
+      <property name='middlename' value='beryl'/>
+      <property name='lastname' value='browning'/>
+      <property name='gender' value='female'/>
+    </entity>
+  </document>
+</content>
