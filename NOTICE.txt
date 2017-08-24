@@ -1,0 +1,27 @@
+
+   _____                .__               .__        
+  /  _  \   ____ _____  |  | ___.__. _____|__| ______
+ /  /_\  \ /    \\__  \ |  |<   |  |/  ___/  |/  ___/
+/    |    \   |  \/ __ \|  |_\___  |\___ \|  |\___ \ 
+\____|__  /___|  (____  /____/ ____/____  >__/____  >
+        \/     \/     \/     \/         \/        \/ 
+___________             .__                                  
+\_   _____/__  ___ ____ |  |__ _____    ____    ____   ____  
+ |    __)_\  \/  // ___\|  |  \\__  \  /    \  / ___\_/ __ \ 
+ |        \>    <\  \___|   Y  \/ __ \|   |  \/ /_/  >  ___/ 
+/_______  /__/\_ \\___  >___|  (____  /___|  /\___  / \___  >
+        \/      \/    \/     \/     \/     \//_____/      \/ 
+
+ An initiative of the Analytic Technology Industry Roundtable 
+
+
+
+                    NOTICE
+ 
+  This software was produced for the U. S. Government
+  under Basic Contract No. FA8702-17-C-0001, and is
+  subject to the Rights in Noncommercial Computer Software
+  and Noncommercial Computer Software Documentation
+  Clause 252.227-7014 (MAY 2013)
+ 
+  (c)2016-2017 The MITRE Corporation. All Rights Reserved.

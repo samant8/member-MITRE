@@ -1,0 +1,11 @@
+target/
+bin/
+*.class
+.classpath
+.settings
+.project
+.metadata
+*.swp
+*.jar
+*.war
+lib/
