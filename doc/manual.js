@@ -132,8 +132,11 @@ function write_user_sidebar() {
                    ['Tangerine', ['./TangerineDemo.htm', 'home']],
                    // Ch. 1,
                    ['Test Client', ['./test-client.htm', 'tester']],
+                   ['Demonstration', ['./demonstration-fwa.htm', 'FWA']],                   
                    // Ch. 2 
-                   ['Transfer Services', ['./transfer-services.htm', 'services']] 
+                   ['Transfer Services', ['./transfer-services.htm', 'services']],
+                   // Ch. 3
+                   ['Tangerine Installation', ['./install.htm', 'install']]
                    
                   //--- end CHAPTERS--- 
                   ]
