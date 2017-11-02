@@ -1,0 +1,2 @@
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?o], ?o[AE#hasSocialSecurityNumber->?s], ?s[label->?sl].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?o], ?o[AE#hasSocialSecurityNumber->?s], ?s[label->?sl].

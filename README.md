@@ -16,25 +16,19 @@ ___________             .__
 An initiative of the Analytic Technology Industry Roundtable
 ```
 
-
 Tangerine
 ===========
 MITRE's contribution to the Analysis Exchange is a reference implementation that 
-touches on the development and use of the full spectrum of items needed in an AE.
+touches on the development and use of the full spectrum of items needed in an instance of the AE.
 
-This prototype is called **Tangerine**;  As of Fall 2017, we are leading up to v1.x
-to support the AE Model v1.0.
+This prototype is called **Tangerine**. As of Fall 2017, this version 1.0 of Tangerine supports
+Analysis Excchange Model v1.0.
 
 Getting Started
 -------------
 
-1. Review the documentation ./doc/TangerineDemo.htm once you have checked out the project
-2. Build the project with Maven:
+1. Review the documentation Tangerine/doc/TangerineDemo.htm once you have checked out the project
+2. Follow the installation notes in the demo user manual
 
-   ``` mvn install ```
 
-If you are trying use Esri adapter(s), then the ArcGIS Runtime Java SDK and examples on github.com 
-are helpful for setting up the Esri runtime. See https://github.com/Esri/arcgis-runtime-samples-java. 
-Synopsis: Once checked out, use ./gradlew build to install gradle and build the Esri projects.  This
-automates the setup of Esri downloads very swiftly.  You must configure you ~/.gradle settings, e.g. 
-proxies, if behind a firewall.
+(c) Copyright MITRE, 2017. All Rights Reserved.

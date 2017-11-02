@@ -1,0 +1,2 @@
+SSN,DoB,Gender,FirstName,MiddleName,LastName,EyeColor,StreetAddress,CityName,State,ZipCode,CountryCode,PhoneNumber,EmailAddress,DriverNumber,DriverState,DriverExpiry,Latitude,Longitude,IsVeteran,HasLienRecord,HasBankruptcyRecord,HasArrestRecord,HasCriminalRecord
+301-27-6586,1952-12-16,Female,Browning,Jessica,Beryl,Gray,37 Fifth Road,Borough of Queens,NY,10088,US,914-315-628,george5231@gmail.com,914-315-628,NY,2021-09-16,40.67854614,-74.03745398,False,True,True,False,False

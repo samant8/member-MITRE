@@ -1,0 +1,3 @@
+?- ?S:sumo#Human, ?S[label->?o].
+?- ?S:AE#PostalAddress, ?S[label->?o].
+?- ?S:AE#VATravelVoucher, ?S[AE#hasAdditionalExpense->?o].

@@ -1,0 +1,9 @@
+results
+piplib
+working
+*.pyc
+.settings
+.project
+.pydevproject
+.classpath
+.checkstyle

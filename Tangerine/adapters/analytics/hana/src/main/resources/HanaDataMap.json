@@ -1,0 +1,352 @@
+{
+	"OntologyMappings": [
+		{
+			"key": "EVENT_ID_CNTY",
+			"mappings": {
+				"instanceID": {
+					"$Event": "<value>"
+				}
+			}
+		},
+		{
+			"key": "EVENT_TYPE",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "a",
+						"O": "<map> Events <value>",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "EVENT_DATE",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "AE#hasTime",
+						"O": "<value>",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "INTER1",
+			"mappings": {
+				"assertions": [],
+				"variables": {
+					"$Inter1": "<map> Actor <value>"
+				},
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "ACTOR1",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "label",
+						"O": "<value>",
+						"S": "$Actor1"
+					},
+					{
+						"P": "AE#hasAgent",
+						"O": "$Actor1",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					"$Actor1": "$Inter1"
+				}
+			}
+		},
+		{
+			"key": "ALLY_ACTOR_1",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "label",
+						"O": "<value>",
+						"S": "$Actor1"
+					},
+					{
+						"P": "AE#hasAgent",
+						"O": "$Actor1",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					"$Actor1": "$Inter1"
+				}
+			}
+		},
+		{
+			"key": "INTER2",
+			"mappings": {
+				"variables": {
+					"$Inter2": "<map> Actor <value>"
+				},
+				"assertions": []
+			}
+		},
+		{
+			"key": "ACTOR2",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "label",
+						"O": "<value>",
+						"S": "$Actor2"
+					},
+					{
+						"P": "AE#hasTheme",
+						"O": "$Actor2",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					"$Actor2": "$Inter2"
+				}
+			}
+		},
+		{
+			"key": "ALLY_ACTOR_2",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "label",
+						"O": "<value>",
+						"S": "$Actor2"
+					},
+					{
+						"P": "AE#hasTheme",
+						"O": "$Actor2",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					"$Actor2": "$Inter2"
+				}
+			}
+		},
+		{
+			"key": "INTERACTION",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "AE#hasInteractionCode",
+						"O": "<map> InteractionCode <value>",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "COUNTRY",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "label",
+						"O": "<value>",
+						"S": "$Country"
+					}
+				],
+				"instances": {
+					"$Country": "sumo#Nation"
+				}
+			}
+		},
+		{
+			"key": "LOCATION",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "AE#hasCountry",
+						"O": "$Country",
+						"S": "$Loc"
+					},
+					{
+						"P": "AE#hasLocation",
+						"O": "$Loc",
+						"S": "$Event"
+					},
+					{
+						"P": "label",
+						"O": "<value>",
+						"S": "$Loc"
+					}
+				],
+				"instances": {
+					"$Loc": "sumo#Region"
+				}
+			}
+		},
+		{
+			"key": "LATITUDE",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "AE#hasLatitude",
+						"O": "<value>",
+						"S": "$Loc"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "LONGITUDE",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "AE#hasLongitude",
+						"O": "<value>",
+						"S": "$Loc"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "FATALITIES",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "AE#hasFatalityCount",
+						"O": "<value>",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "NOTES",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "label",
+						"O": "<value>",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "SOURCE",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "hasAnnotation",
+						"O": "<value>",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		},
+		{
+			"key": "RC_JSON",
+			"mappings": {
+				"assertions": [
+					{
+						"P": "hasRCJSON",
+						"O": "<value>",
+						"S": "$Event"
+					}
+				],
+				"instances": {
+					
+				}
+			}
+		}
+	],
+	"Events": {
+		"Battle-No change of territory": "AE#NoChangeOfTerritoryBattle",
+		"Battle-Non-state actor overtakes territory": "AE#OvertakeTerritoryBattle",
+		"Battle-Government regains territory": "AE#RegainTerritoryBattle",
+		"Headquarters or base established": "AE#EstablishBase",
+		"Strategic development": "AE#StrategicDevelopment",
+		"Riots/Protests": "AE#Protest",
+		"Violence against civilians": "AE#CivilianAttack",
+		"Non-violent transfer of territory": "AE#TerritoryTransfer",
+		"Remote violence": "AE#RemoteAttack"
+	},
+	"Actor": {
+		"1": "AE#GovernmentForce",
+		"2": "AE#RebelForce",
+		"3": "AE#PoliticalMilitia",
+		"4": "AE#EthnicMilitia",
+		"5": "AE#Rioter",
+		"6": "AE#Protester",
+		"7": "sumo#Civilian",
+		"8": "AE#ExternalForce"
+	},
+	"InteractionCode": {
+		"10": "SOLE MILITARY ACTION",
+		"11": "MILITARY VERSUS MILITARY",
+		"12": "MILITARY VERSUS REBELS",
+		"13": "MILITARY VERSUS POLITICAL MILITIA",
+		"14": "MILITARY VERSUS COMMUNAL MILITIA",
+		"15": "MILITARY VERSUS RIOTERS",
+		"16": "MILITARY VERSUS PROTESTERS",
+		"17": "MILITARY VERSUS CIVILIANS",
+		"18": "MILITARY VERSUS OTHER",
+		"20": "SOLE REBEL ACTION",
+		"22": "REBELS VERSUS REBELS",
+		"23": "REBELS VERSUS POLITICAL MILIITA",
+		"24": "REBELS VERSUS COMMUNAL MILITIA",
+		"25": "REBELS VERSUS RIOTERS",
+		"26": "REBELS VERSUS PROTESTERS",
+		"27": "REBELS VERSUS CIVILIANS",
+		"28": "REBELS VERSUS OTHERS",
+		"30": "SOLE POLITICAL MILITIA ACTION",
+		"33": "POLITICAL MILITIA VERSUS POLITICAL MILITIA",
+		"34": "POLITICAL MILITIA VERSUS COMMUNAL MILITIA",
+		"35": "POLITICAL MILITIA VERSUS RIOTERS",
+		"36": "POLITICAL MILITIA VERSUS PROTESTERS",
+		"37": "POLITICAL MILITIA VERSUS CIVILIANS",
+		"38": "POLITICAL MILITIA VERSUS OTHERS",
+		"40": "SOLE COMMUNAL MILITIA ACTION",
+		"44": "COMMUNAL MILITIA VERSUS COMMUNAL MILITIA",
+		"45": "COMMUNAL MILITIA VERSUS RIOTERS",
+		"46": "COMMUNAL MILITIA VERSUS PROTESTERS",
+		"47": "COMMUNAL MILITIA VERSUS CIVILIANS",
+		"48": "COMMUNAL MILITIA VERSUS OTHER",
+		"50": "SOLE RIOTER ACTION",
+		"55": "RIOTERS VERSUS RIOTERS",
+		"56": "RIOTERS VERSUS PROTESTERS",
+		"57": "RIOTERS VERSUS CIVILIANS",
+		"58": "RIOTERS VERSUS OTHERS",
+		"60": "SOLE PROTESTER ACTION",
+		"66": "PROTESTERS VERSUS PROTESTERS",
+		"67": "PROTESTERS VERSUS CIVILIANS",
+		"68": "PROTESTERS VERSUS OTHER",
+		"78": "OTHER ACTOR VERSUS CIVILIANS",
+		"80": "SOLE OTHER ACTION"
+	}
+}

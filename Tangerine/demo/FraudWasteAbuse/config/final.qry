@@ -1,0 +1,42 @@
+// claimant information
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?c], ?c[AE#hasName->?cn], ?cn[label->?claimantFullName].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?c], ?c[AE#hasName->?cn], ?cn[AE#hasFirstName->?claimantFirstName].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?c], ?c[AE#hasName->?cn], ?cn[AE#hasLastName->?claimantLastName].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?c], ?c[AE#hasSocialSecurityNumber->?s], ?s[label->?claimantSsn].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?c], ?c[AE#hasLiens->?claimantHasLiens], ?claimantHasLiens[transLabel->?claimantHasLiensBoolean].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?c], ?c[AE#hasDeclaredBankruptcy->?claimantHasDeclaredBankruptcy], ?claimantHasDeclaredBankruptcy[transLabel->?claimantHasDeclaredBankruptcyBoolean].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?c], ?c[AE#hasArrestRecord->?claimantHasArrestRecord], ?claimantHasArrestRecord[transLabel->?claimantHasArrestRecordBoolean].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?c], ?c[AE#hasCriminalRecord->?claimantHasCriminalRecord], ?claimantHasCriminalRecord[transLabel->?claimantHasCriminalRecordBoolean].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimantStatus->?claimantRole].
+// beneficiary information
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?b], ?b[AE#hasName->?cn], ?cn[label->?beneficiaryFullName].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?b], ?b[AE#hasName->?cn], ?cn[AE#hasFirstName->?beneficiaryFirstName].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?b], ?b[AE#hasName->?cn], ?cn[AE#hasLastName->?beneficiaryLastName].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?b], ?b[AE#hasSocialSecurityNumber->?s], ?s[label->?beneficiarySsn].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?b], ?b[AE#hasLiens->?beneficiaryHasLiens], ?beneficiaryHasLiens[transLabel->?beneficiaryHasLiensBoolean].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?b], ?b[AE#hasDeclaredBankruptcy->?beneficiaryHasDeclaredBankruptcy], ?beneficiaryHasDeclaredBankruptcy[transLabel->?beneficiaryHasDeclaredBankruptcyBoolean].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?b], ?b[AE#hasArrestRecord->?beneficiaryHasArrestRecord], ?beneficiaryHasArrestRecord[transLabel->?beneficiaryHasArrestRecordBoolean].
+?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?b], ?b[AE#hasCriminalRecord->?beneficiaryHasCriminalRecord], ?beneficiaryHasCriminalRecord[transLabel->?beneficiaryHasCriminalRecordBoolean].
+// travel events (to VA)
+?- ?t:AE#Travelling, ?t[label->'TravelToVA'], ?t[AE#hasPath->?p], ?p[AE#hasDistance->?d], ?d[AE#numericValue->?toVAExpectedDistanceValue], ?d[AE#hasUnitOfMeasure->?toVADistanceUnitOfMeasure].
+?- ?t:AE#Travelling, ?t[label->'TravelToVA'], ?t[AE#hasPath->?p], ?p[AE#hasExpectedTravelTime->?d], ?d[AE#numericValue->?toVAExpectedTimeValue], ?d[AE#hasUnitOfMeasure->?toVATimeUnitOfMeasure].
+?- ?t:AE#Travelling, ?t[label->'TravelToVA'], ?t[AE#hasDestination->?d], ?d[label->?toVADestinationFullAddress].
+?- ?t:AE#Travelling, ?t[label->'TravelToVA'], ?t[AE#hasDestination->?d], ?d[AE#hasStreet->?s], ?s[label->?toVADestinationStreetName], ?d[AE#hasCity->?c], ?c[label->?toVADestinationCity], ?d[AE#hasState->?st], ?st[label->?toVADestinationState], ?d[AE#hasZipcode->?toVADestinationZipCode].
+?- ?t:AE#Travelling, ?t[label->'TravelToVA'], ?t[AE#hasOrigin->?d], ?d[label->?toVAOriginFullAddress].
+?- ?t:AE#Travelling, ?t[label->'TravelToVA'], ?t[AE#hasOrigin->?d], ?d[AE#hasStreet->?s], ?s[label->?toVAOriginStreetName], ?d[AE#hasCity->?c], ?c[label->?toVAOriginCity], ?d[AE#hasState->?st], ?st[label->?toVAOriginState], ?d[AE#hasZipcode->?toVAOriginZipCode].
+?- ?t:AE#Travelling, ?t[label->'TravelToVA'], ?t[AE#hasPath->?p], ?p[AE#hasStartRegion->?s], ?s[AE#hasLatitude->?toVAOriginLatitude], ?s[AE#hasLongitude->?toVAOriginLongitude].
+?- ?t:AE#Travelling, ?t[label->'TravelToVA'], ?t[AE#hasPath->?p], ?p[AE#hasEndRegion->?e], ?e[AE#hasLatitude->?toVADestinationLatitude], ?e[AE#hasLongitude->?toVADestinationLongitude].
+// travel events (from VA)
+?- ?t:AE#Travelling, ?t[label->'TravelFromVA'], ?t[AE#hasPath->?p], ?p[AE#hasDistance->?d], ?d[AE#numericValue->?fromVAExpectedDistanceValue], ?d[AE#hasUnitOfMeasure->?fromVADistanceUnitOfMeasure].
+?- ?t:AE#Travelling, ?t[label->'TravelFromVA'], ?t[AE#hasPath->?p], ?p[AE#hasExpectedTravelTime->?d], ?d[AE#numericValue->?fromVAExpectedTimeValue], ?d[AE#hasUnitOfMeasure->?fromVATimeUnitOfMeasure].
+?- ?t:AE#Travelling, ?t[label->'TravelFromVA'], ?t[AE#hasDestination->?d], ?d[label->?fromVADestinationFullAddress].
+?- ?t:AE#Travelling, ?t[label->'TravelFromVA'], ?t[AE#hasDestination->?d], ?d[AE#hasStreet->?s], ?s[label->?fromVADestinationStreetName], ?d[AE#hasCity->?c], ?c[label->?fromVADestinationCity], ?d[AE#hasState->?st], ?st[label->?fromVADestinationState], ?d[AE#hasZipcode->?fromVADestinationZipCode].
+?- ?t:AE#Travelling, ?t[label->'TravelFromVA'], ?t[AE#hasOrigin->?d], ?d[label->?hasVAOriginFullAddress].
+?- ?t:AE#Travelling, ?t[label->'TravelFromVA'], ?t[AE#hasOrigin->?d], ?d[AE#hasStreet->?s], ?s[label->?fromVAOriginStreetName], ?d[AE#hasCity->?c], ?c[label->?fromVAOriginCity], ?d[AE#hasState->?st], ?st[label->?fromVAOriginState], ?d[AE#hasZipcode->?fromVAOriginZipCode].
+?- ?t:AE#Travelling, ?t[label->'TravelFromVA'], ?t[AE#hasPath->?p], ?p[AE#hasStartRegion->?s], ?s[AE#hasLatitude->?fromVAOriginLatitude], ?s[AE#hasLongitude->?fromVAOriginLongitude].
+?- ?t:AE#Travelling, ?t[label->'TravelFromVA'], ?t[AE#hasPath->?p], ?p[AE#hasEndRegion->?e], ?e[AE#hasLatitude->?fromVADestinationLatitude], ?e[AE#hasLongitude->?fromVADestinationLongitude].
+// expenses
+?- ?v:AE#VATravelVoucher, ?v[AE#hasItemizedExpense->?cm], ?cm[label->?itemizedExpense].
+//other
+//?- ?t:sumo#Human, ?t[AE#hasFakeSSN->?L].
+// consequnce :- antecedent.

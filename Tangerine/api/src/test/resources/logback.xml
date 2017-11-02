@@ -1,0 +1,24 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Date/time stamped method logged with a message and new-line.-->
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSS} %-5level %logger{36} - %msg%n%exception{4}</pattern>
+        </encoder>
+    </appender>
+
+    <!--  Root  -->
+    <root level="error" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <!--  Loggers -->
+    <logger name="org.apache" level="error">
+    </logger>
+    <logger name="org.mitre.tangerine" level="info">
+    </logger>
+    <logger name="org.mitre.tangerine.test" level="debug">
+    </logger>
+
+</configuration>
+

@@ -1,0 +1,326 @@
+{
+	"OntologyMappings": [
+		{
+			"key": "ClaimId",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$Voucher",
+						"P": "label",
+						"O": "<value>"
+					}
+				]
+			}
+		},
+		{
+			"key": "ClaimantName",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$Claimant",
+						"P": "AE#hasName",
+						"O": "$ClaimantName"
+					},
+					{
+						"S": "$ClaimantName",
+						"P": "label",
+						"O": "<value>"
+					},
+					{
+						"S": "$Claimant",
+						"P": "label",
+						"O": "<value>"
+					},
+					{
+						"S": "$Voucher",
+						"P": "AE#hasVoucherClaimant",
+						"O": "$Claimant"
+					}
+				],
+				"instances": {
+					"$ClaimantName": "sumo#Name",
+					"$Claimant": "sumo#Human"
+				}
+			}
+		},
+		{
+			"key": "ClaimFromAddress",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$FromAddress",
+						"P": "label",
+						"O": "<value>"
+					}
+				],
+				"instances": {
+					"$FromAddress": "AE#PostalAddress"
+				}
+			}
+		},
+		{
+			"key": "FacilityName",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$Facility",
+						"P": "label",
+						"O": "<value>"
+					},
+					{
+						"S": "$Voucher",
+						"P": "AE#hasVAVoucherTreatmentFacility",
+						"O": "$Facility"
+					}
+				],
+				"instances": {
+					"$Facility": "sumo#Building"
+				}
+			}
+		},
+		{
+			"key": "ClaimToAddress",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$ToAddress",
+						"P": "label",
+						"O": "<value>"
+					}
+				],
+				"instances": {
+					"$ToAddress": "AE#PostalAddress"
+				}
+			}
+		},
+		{
+			"key": "FacilityAddress",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$FacilityAddress",
+						"P": "label",
+						"O": "<value>"
+					},
+					{
+						"S": "$Facility",
+						"P": "AE#hasAddress",
+						"O": "$FacilityAddress"
+					},
+					{
+						"S": "$Voucher",
+						"P": "AE#hasVoucherTravel",
+						"O": "$TravelToVA"
+					},
+					{
+						"S": "$TravelToVA",
+						"P": "label",
+						"O": "TravelToVA"
+					},
+					{
+						"S": "$TravelToVA",
+						"P": "AE#hasOrigin",
+						"O": "$FromAddress"
+					},
+					{
+						"S": "$TravelToVA",
+						"P": "AE#hasDestination",
+						"O": "$FacilityAddress"
+					},
+					{
+						"S": "$Voucher",
+						"P": "AE#hasVoucherTravel",
+						"O": "$TravelFromVA"
+					},
+					{
+						"S": "$TravelFromVA",
+						"P": "label",
+						"O": "TravelFromVA"
+					},
+					{
+						"S": "$TravelFromVA",
+						"P": "AE#hasDestination",
+						"O": "$ToAddress"
+					},
+					{
+						"S": "$TravelFromVA",
+						"P": "AE#hasOrigin",
+						"O": "$FacilityAddress"
+					}
+				],
+				"instances": {
+					"$TravelFromVA": "AE#Travelling",
+					"$TravelToVA": "AE#Travelling",
+					"$FacilityAddress": "AE#PostalAddress"
+				}
+			}
+		},
+		{
+			"key": "TreatmentDate",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$TravelToVA",
+						"P": "label",
+						"O": "<value>"
+					}
+				]
+			}
+		},
+		{
+			"key": "ToTravelDate",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$TravelToVA",
+						"P": "AE#hasTime",
+						"O": "<value>"
+					}
+				]
+			}
+		},
+		{
+			"key": "FromTravelDate",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$TravelFromVA",
+						"P": "AE#hasTime",
+						"O": "<value>"
+					}
+				]
+			}
+		},
+		{
+			"key": "ItemizedExpenses",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$Voucher",
+						"P": "AE#hasAdditionalExpense",
+						"O": "<value>"
+					}
+				]
+			}
+		},
+		{
+			"key": "VetSSN",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$VeteranSSN",
+						"P": "label",
+						"O": "<value>"
+					},
+					{
+						"S": "$Veteran",
+						"P": "AE#hasSocialSecurityNumber",
+						"O": "$VeteranSSN"
+					}
+				],
+				"instances": {
+					"$VeteranSSN": "AE#SocialSecurityNumber"
+				}
+			}
+		},
+		{
+			"key": "ClaimDate",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$Voucher",
+						"P": "AE#hasSignatureDate",
+						"O": "<value>"
+					}
+				]
+			}
+		},
+		{
+			"key": "VetName",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$VeteranName",
+						"P": "label",
+						"O": "<value>"
+					},
+					{
+						"S": "$Veteran",
+						"P": "AE#hasName",
+						"O": "$VeteranName"
+					},
+					{
+						"S": "$Veteran",
+						"P": "label",
+						"O": "<value>"
+					},
+					{
+						"S": "$Voucher",
+						"P": "AE#hasVoucherBeneficiary",
+						"O": "$Veteran"
+					}
+				],
+				"instances": {
+					"$VeteranName": "sumo#Name",
+					"$Veteran": "sumo#Human"
+				}
+			}
+		},
+		{
+			"key": "ClaimantDoB",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$Claimant",
+						"P": "AE#hasDateOfBirth",
+						"O": "<value>"
+					}
+				]
+			}
+		},
+		{
+			"key": "ClaimantSSN",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$ClaimantSSN",
+						"P": "label",
+						"O": "<value>"
+					},
+					{
+						"S": "$Claimant",
+						"P": "AE#hasSocialSecurityNumber",
+						"O": "$ClaimantSSN"
+					}
+				],
+				"instances": {
+					"$ClaimantSSN": "AE#SocialSecurityNumber"
+				}
+			}
+		},
+		{
+			"key": "Role",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$Voucher",
+						"P": "AE#hasVoucherClaimantStatus",
+						"O": "<value>"
+					}
+				]
+			}
+		},
+		{
+			"key": "VetDoB",
+			"mappings": {
+				"asserts": [
+					{
+						"S": "$Veteran",
+						"P": "AE#hasDateOfBirth",
+						"O": "<value>"
+					}
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,1 @@
+?- ?p:AE#PostalAddress, ?p[label->?fullAddress].

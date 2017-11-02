@@ -1,2 +1,0 @@
-?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherClaimant->?o].
-?- ?v:AE#VATravelVoucher, ?v[AE#hasVoucherBeneficiary->?o].
