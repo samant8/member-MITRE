@@ -27,7 +27,8 @@ Analysis Excchange Model v1.0.
 Getting Started
 -------------
 
-1. Review the documentation Tangerine/doc/TangerineDemo.htm once you have checked out the project
+1. Review the documentation [Tangerine Demo](https://analytic-roundtable.github.io/mitre-tangerine-doc/TangerineDemo.htm) 
+once you have checked out the project
 2. Follow the installation notes in the demo user manual
 
 
