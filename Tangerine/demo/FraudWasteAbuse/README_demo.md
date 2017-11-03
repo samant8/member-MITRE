@@ -59,7 +59,7 @@ combined data analytics that occur on a "unit" of data -- a unit being here a si
    #   URL for NetOwl, 
    #   And clean output folders prior to run.
    #
-   python ./uc1.py --claims ./data/AllClaims.csv --pii ./data/Person.csv \
+   python ./demo-pipeline.py --claims ./data/AllClaims.csv --pii ./data/Person.csv \
        --server TANGERINE_SERVER --netowl-server NETOWL_URL --clean
 ```
 
