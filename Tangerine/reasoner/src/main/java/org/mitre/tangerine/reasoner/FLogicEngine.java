@@ -13,12 +13,10 @@
  */
 
 package org.mitre.tangerine.reasoner;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.LinkedList;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +37,6 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,7 +61,6 @@ public class FLogicEngine {
      */
     private StringIndex ontoRulesIndex = new StringIndex(); // String -> Integer
     private StringIndex predIndex = new StringIndex();
-    private StringIndex[] argsIndex = new StringIndex[FLogicConstants.MAX_ARITY];
     /**
      *
      */
@@ -77,11 +72,8 @@ public class FLogicEngine {
      */
     private FLogicKB KB = new FLogicKB(); // assertions that are stored in the
     // onotlogy i.e. constants
-    private Map<Integer, Integer> classesToCache = new LinkedHashMap<Integer, Integer>();
     private final Pattern FUNC_EXPR = Pattern.compile("(.+)\\((.+)\\)");
     private final Pattern ATTR_EXPR = Pattern.compile("\\$(.+)->(.+)");
-
-    private HashMap<String, String> ancCache; // Ancestor Cache for 1 class
 
     private ArrayList<String> SymmetricPredicates, TransitivePredicates;
     private HashMap<String, String> InverseOf;
@@ -93,9 +85,6 @@ public class FLogicEngine {
     private MongoDBCluster mgClient;
     private PythonClient pyClient;
     private ElasticSearchCluster esClient;
-    // private MySQLClient myClient;
-
-    private JSONObject QueryPatterns;
 
     private ExecutorService executor;
 
@@ -115,7 +104,6 @@ public class FLogicEngine {
         for (String pred : FLogicConstants.AggregatePreds.split(" "))
             aggregatePreds.add(pred);
 
-        ancCache = new HashMap<String, String>();
         SymmetricPredicates = new ArrayList<String>();
         TransitivePredicates = new ArrayList<String>();
         InverseOf = new HashMap<String, String>();
@@ -140,15 +128,10 @@ public class FLogicEngine {
             e.printStackTrace();
         }
 
-        // load query patterns
-        QueryPatterns = FLConfig;
-
-        Map<String, String> env = System.getenv();
 
         mgClient = new MongoDBCluster(FLConfig);
         esClient = new ElasticSearchCluster(FLConfig);
         pyClient = new PythonClient(FLConfig, this);
-        // myClient = new MySQLClient(FLConfig);
 
         executor = Executors.newFixedThreadPool(3);
 
@@ -171,18 +154,6 @@ public class FLogicEngine {
         esClient.close();
     }
 
-    // Disjunction over child and parent
-    public boolean isaOr(List<String> child, String parent, FLogicEnvironment flEnv) {
-        flEnv.setAnswer(new ArrayList<String>());
-        for (String str : child) {
-            if (isa(str, parent, flEnv)) {
-                flEnv.getAnswer().add(str);
-            }
-        }
-
-        return (flEnv.getAnswer().size() > 0);
-    }
-
     public boolean isaOr(List<String> child, List<String> parent, FLogicEnvironment flEnv) {
         flEnv.setAnswer(new ArrayList<String>());
         for (String str : child) {
@@ -194,57 +165,6 @@ public class FLogicEngine {
         }
 
         return (flEnv.getAnswer().size() > 0);
-    }
-
-    public void classifyInstance(String term, List<String> entityTypes, List<String> modifiers,
-                                 FLogicEnvironment flEnv) {
-        Set<String> entityTypeSet = new HashSet<String>();
-        List<String> tmpEntityTypes = new ArrayList<String>();
-        List<Integer> ts = new ArrayList<Integer>();
-
-        entityTypeSet.addAll(entityTypes);
-
-        // look for new derived entity types for the instance rules
-        // instance rules take presidence
-        if (tmpEntityTypes.isEmpty()) {
-            // Query the KB
-            // The instance mapping rules have already been executed
-            getInstanceAssertions(term, "<:", "?par", FLogicConstants.DEFAULT_GRAPH, ts, flEnv);
-            for (int i = 0; i < ts.size(); i++) {
-                N_ary tr = flEnv.getKB().getAssertion(ts.get(i));
-                if (!entityTypeSet.contains(tr.getArgs()[1])) {
-                    tmpEntityTypes.add(tr.getArgs()[1]);
-                }
-            }
-        }
-
-        if (!tmpEntityTypes.isEmpty()) {
-            entityTypes = new ArrayList<String>();
-            entityTypes.addAll(tmpEntityTypes);
-        }
-    }
-
-    public void reduceSemanticTypes(List<String> entityTypes, boolean strict, FLogicEnvironment flEnv) {
-        List<String> tmpEntityTypes = new ArrayList<String>();
-        tmpEntityTypes.addAll(entityTypes);
-        entityTypes.clear();
-        for (int i = 0; i < tmpEntityTypes.size(); i++) {
-            String parent = tmpEntityTypes.get(i);
-            int subsumeCount = 0;
-            for (int j = 0; j < tmpEntityTypes.size(); j++) {
-                String child = tmpEntityTypes.get(j);
-                if (i != j) {
-                    if ((strict && subsumes(parent, child, flEnv)) || (!strict && isa(child, parent, flEnv))) {
-                        if (!sameAs(child, parent, flEnv)) {
-                            subsumeCount++;
-                        }
-                    }
-                }
-            }
-            if (subsumeCount == 0) {
-                entityTypes.add(parent);
-            }
-        }
     }
 
     private boolean semanticMatch(String val1, String val2, FLogicEnvironment flEnv) {
@@ -320,271 +240,6 @@ public class FLogicEngine {
             }
         }
 
-    }
-
-    /*
-     * Does the parent completely subsume the child Evaluate ?C :: ?Y, ~P :: ?Y,
-     * ~?Y :: ?P.
-     */
-    public boolean subsumes(String parent, String child, FLogicEnvironment flEnv) {
-        boolean retVal = false;
-        List<OntoObject> scanList = new ArrayList<OntoObject>();
-        List<String> ancs = new ArrayList<String>();
-
-        if (!isa(child, parent, flEnv))
-            return false;
-
-        OntoObject p = getOnt().get(parent);
-        OntoObject c = getOnt().get(child);
-        // init Ontology_Environment
-        flEnv.getHistory().clear();
-        flEnv.getSearched().clear();
-        // seed with local super & equivalent classes
-        for (OntoObject ocs : c.getSups().values()) {
-            flEnv.getSearched().set(ocs.getNodeId());
-        }
-
-        while (flEnv.getHistory().size() > 0) {
-            c = flEnv.getHistory().remove(0);
-            ancs.add(c.getName());
-            scanList.clear();
-            scanList.addAll(c.getSups().values());
-            scanList.addAll(c.getEq().values());
-            for (OntoObject ocs : scanList) {
-                if (!flEnv.getSearched().get(ocs.getNodeId())) {
-                    flEnv.getHistory().add(ocs);
-                    flEnv.getSearched().set(ocs.getNodeId());
-                }
-            }
-        }
-
-        // look for ancestor of child that is not a descendant of parent
-        for (String s : ancs) {
-            if (!isa(parent, s, flEnv) && !isa(s, parent, flEnv)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public int minDist(List<String> c, List<String> p, FLogicEnvironment flEnv) {
-        int minDisIdx = 0;
-        int md = FLogicConstants.MAX_ONTOLOGY_DISTANCE;
-        for (int i = 0; i < c.size(); i++) {
-            for (int j = 0; j < p.size(); j++) {
-                int d = distance(c.get(i), p.get(j), flEnv);
-                if (d < md) {
-                    md = d;
-                    minDisIdx = i;
-                }
-            }
-        }
-
-        String tmpC = c.get(0);
-        c.set(0, c.get(minDisIdx));
-        c.set(minDisIdx, tmpC);
-
-        return md;
-    }
-
-    public int distance(String child, String parent, FLogicEnvironment flEnv) {
-        int distance = FLogicConstants.MAX_ONTOLOGY_DISTANCE;
-        int[] distances = new int[FLogicConstants.MAX_ONTOLOGY_CLASS_CNT];
-
-        OntoObject c = getOnt().get(child);
-        OntoObject p = getOnt().get(parent);
-        if (p != null && c != null) {
-            if (c == p) {
-                distance = 0;
-            } else {
-                flEnv.getHistory().clear();
-                flEnv.getSearched().clear();
-                for (OntoObject ocs : c.getEq().values()) {
-                    flEnv.getHistory().add(ocs);
-                    flEnv.getSearched().set(ocs.getNodeId());
-                    distances[ocs.getNodeId()] = 0;
-                }
-
-                for (OntoObject ocs : c.getSups().values()) {
-                    flEnv.getHistory().add(ocs);
-                    flEnv.getSearched().set(ocs.getNodeId());
-                    distances[ocs.getNodeId()] = 1;
-                }
-
-                while (flEnv.getHistory().size() > 0) {
-                    OntoObject ocs = flEnv.getHistory().remove(0);
-                    if (ocs == p) {
-                        distance = distances[ocs.getNodeId()];
-                        break;
-                    } else {
-                        // if (ocs.getEqList().size() > 0) {
-                        for (OntoObject a : ocs.getEq().values()) {
-                            if (!flEnv.getSearched().get(a.getNodeId())) {
-                                flEnv.getHistory().add(a);
-                                flEnv.getSearched().set(a.getNodeId());
-                                distances[a.getNodeId()] = distances[ocs.getNodeId()];
-                            }
-                        }
-                        // }
-                        // if (ocs.getSupList().size() > 0) {
-                        for (OntoObject a : ocs.getSups().values()) {
-                            if (!flEnv.getSearched().get(a.getNodeId())) {
-                                flEnv.getHistory().add(a);
-                                flEnv.getSearched().set(a.getNodeId());
-                                distances[a.getNodeId()] = distances[ocs.getNodeId()] + 1;
-                            }
-                        }
-                        // }
-                    }
-                }
-
-            }
-        }
-
-        return distance;
-    }
-
-    public LinkedHashMap<String, Integer> distanceToAncestors(String cls, FLogicEnvironment flEnv, boolean cache) {
-        int distance = FLogicConstants.MAX_ONTOLOGY_DISTANCE;
-        LinkedHashMap<String, Integer> DistMap = new LinkedHashMap<String, Integer>();
-
-        String serializedAncs = "";
-        synchronized (ancCache) {
-            if (ancCache.containsKey(cls)) {
-                serializedAncs = ancCache.get(cls);
-            }
-        }
-        if (serializedAncs.length() > 0) {
-            String[] Tok = serializedAncs.split(" ");
-            for (String pair : Tok) {
-                String[] cls_dist = pair.split("=");
-                DistMap.put(cls_dist[0], Integer.parseInt(cls_dist[1]));
-            }
-            return DistMap;
-        }
-
-        OntoObject c = getOnt().get(cls);
-        if (c != null) {
-            flEnv.getHistory().clear();
-            flEnv.getSearched().clear();
-            DistMap.put(cls, 0);
-            for (OntoObject ocs : c.getEq().values()) {
-                flEnv.getHistory().add(ocs);
-                flEnv.getSearched().set(ocs.getNodeId());
-                DistMap.put(ocs.getName(), 0);
-            }
-
-            for (OntoObject ocs : c.getSups().values()) {
-                flEnv.getHistory().add(ocs);
-                flEnv.getSearched().set(ocs.getNodeId());
-                DistMap.put(ocs.getName(), 1);
-            }
-
-            while (flEnv.getHistory().size() > 0) {
-                OntoObject ocs = flEnv.getHistory().remove(0);
-                for (OntoObject a : ocs.getEq().values()) {
-                    if (!flEnv.getSearched().get(a.getNodeId())) {
-                        flEnv.getHistory().add(a);
-                        flEnv.getSearched().set(a.getNodeId());
-                        DistMap.put(a.getName(), DistMap.get(ocs.getName()));
-                    }
-                }
-                for (OntoObject a : ocs.getSups().values()) {
-                    if (!flEnv.getSearched().get(a.getNodeId())) {
-                        flEnv.getHistory().add(a);
-                        flEnv.getSearched().set(a.getNodeId());
-                        DistMap.put(a.getName(), DistMap.get(ocs.getName()) + 1);
-                    }
-                }
-            }
-        }
-
-        if (cache) {
-            serializedAncs = "";
-            for (Map.Entry<String, Integer> entry : DistMap.entrySet()) {
-                String anc = entry.getKey();
-                int dist = entry.getValue();
-                String pair = anc + "=" + dist;
-                if (serializedAncs.isEmpty())
-                    serializedAncs = pair;
-                else
-                    serializedAncs = serializedAncs + " " + pair;
-            }
-            synchronized (ancCache) {
-                ancCache.put(cls, serializedAncs);
-            }
-        }
-        return DistMap;
-    }
-
-    public int distanceBetweenConcepts(String con1, String con2, FLogicEnvironment flEnv) {
-        LinkedHashMap<String, Integer> con1Ancs, con2Ancs;
-
-        OntoObject c;
-        int minDist = 34;
-
-        c = getOnt().get(con1);
-        if (c == null)
-            return FLogicConstants.MAX_ONTOLOGY_DISTANCE;
-        c = getOnt().get(con2);
-        if (c == null)
-            return FLogicConstants.MAX_ONTOLOGY_DISTANCE;
-
-        long sttm = System.currentTimeMillis();
-        con1Ancs = distanceToAncestors(con1, flEnv, true);
-        con2Ancs = distanceToAncestors(con2, flEnv, true);
-        long edtm = System.currentTimeMillis();
-        flEnv.funcTime += edtm - sttm;
-
-        // find the closest common ancestor
-        for (Map.Entry<String, Integer> entry : con1Ancs.entrySet()) {
-            String anc = entry.getKey();
-            if (con2Ancs.containsKey(anc)) {
-                int dist = entry.getValue() + con2Ancs.get(anc);
-                if (dist < minDist) {
-                    minDist = dist;
-                    break;
-                }
-            }
-        }
-
-        return minDist;
-    }
-
-    public boolean inRange(List<String> cls, List<String> range, List<String> negRange, List<String> relaxTo,
-                           List<String> negRelaxTo, FLogicEnvironment flEnv) {
-        flEnv.getAnswer().clear();
-        flEnv.getRelaxToAnswer().clear();
-        for (String clsStr : cls) {
-            boolean rangeTest = ontoRangeCheck(clsStr, range, flEnv);
-            if (rangeTest && !ontoRangeCheck(clsStr, negRange, flEnv)) {
-                flEnv.getAnswer().add(clsStr);
-            } else {
-                rangeTest = false;
-            }
-            if (!rangeTest) {
-                boolean relaxToTest = ontoRangeCheck(clsStr, relaxTo, flEnv);
-                if (relaxToTest && !ontoRangeCheck(clsStr, negRelaxTo, flEnv)) {
-                    flEnv.getRelaxToAnswer().add(clsStr);
-                }
-            }
-        }
-
-        return !flEnv.getAnswer().isEmpty();
-    }
-
-    private boolean ontoRangeCheck(String c, List<String> s, FLogicEnvironment flEnv) {
-        boolean retVal = false;
-
-        for (String str : s) {
-            if (isa(c, str, flEnv)) {
-                retVal = true;
-                break;
-            }
-        }
-
-        return retVal;
     }
 
     /**
@@ -685,7 +340,6 @@ public class FLogicEngine {
      */
     public boolean isa(String child, String parent, FLogicEnvironment oenv) {
         OntoObject c, p;
-        int i;
 
         if (!ont.containsKey(child)) {
             return false;
@@ -753,67 +407,7 @@ public class FLogicEngine {
         return false;
     }
 
-    public boolean isa(String child, List<String> parents, FLogicEnvironment oenv) {
-        BitSet parentBits = new BitSet(FLogicConstants.MAX_ISA_CACHE);
-        Set<Integer> parentIds = new HashSet<Integer>();
-
-        OntoObject c = getOnt().get(child);
-        if (c == null) {
-            return false;
-        }
-
-        // get the parent ids
-        for (String ps : parents) {
-            OntoObject p = getOnt().get(ps);
-            if (p == null)
-                continue;
-            if (c.getNodeId() == p.getNodeId())
-                return true;
-            parentIds.add(p.getNodeId());
-            if (getClassesToCache().containsKey(p.getNodeId())) {
-                parentBits.set(getClassesToCache().get(p.getNodeId()));
-            }
-        }
-
-        if (parentIds.isEmpty())
-            return false;
-
-        if (c.getIsaCache().intersects(parentBits))
-            return true;
-
-        // init Ontology_Environment
-        oenv.getHistory().clear();
-        oenv.getSearched().clear();
-        // seed with local super & equivalent classes
-        c.collectSupsToList(oenv.getHistory(), true);
-        for (OntoObject n : oenv.getHistory()) {
-            oenv.getSearched().set(n.getNodeId());
-        }
-        while (oenv.getHistory().size() > 0) {
-            OntoObject n = oenv.getHistory().remove(0);
-            if (parentIds.contains(n.getNodeId())) {
-                if (classesToCache.containsKey(n.getNodeId())) {
-                    c.getIsaCache().set(classesToCache.get(n.getNodeId()));
-                }
-                return true;
-            }
-            if (n.getIsaCache().intersects(parentBits)) {
-                c.getIsaCache().or(n.getIsaCache()); // update the isa cache
-                return true;
-            }
-            List<OntoObject> scanList = new ArrayList<OntoObject>();
-            n.collectSupsToList(scanList, true); // include equivalence links
-            for (OntoObject a : scanList) {
-                if (!oenv.getSearched().get(a.getNodeId())) {
-                    oenv.getHistory().add(a);
-                    oenv.getSearched().set(a.getNodeId());
-                }
-            }
-        }
-
-        return false;
-    }
-
+    
     /**
      *
      * @param child
@@ -843,7 +437,6 @@ public class FLogicEngine {
      * @param oenv
      */
     public void getAncestors(String className, FLogicEnvironment oenv) {
-        int i;
         OntoObject cls;
 
         oenv.getHistory().clear();
@@ -881,7 +474,6 @@ public class FLogicEngine {
     }
 
     public void getDescendants(String className, FLogicEnvironment oenv) {
-        int i;
         OntoObject cls;
 
         oenv.getHistory().clear();
@@ -999,7 +591,6 @@ public class FLogicEngine {
             FLogicEnvironment oenv) {
         boolean match;
         N_ary assrt;
-        OntoObject c, n, a;
         String searchPred = null;
         List<Integer> vals = new ArrayList<Integer>();
 
@@ -1279,9 +870,6 @@ public class FLogicEngine {
     }
 
     public void clearKB(FLogicEnvironment oenv) {
-        if (oenv.executionMode == FLogicConstants.FULL_MODE) {
-            ;
-        }
         oenv.clear();
         oenv.clearInferred();
     }
@@ -1365,8 +953,6 @@ public class FLogicEngine {
     public void getDirectSubclassAssertions(String sub, String pred, String obj, String graph, ArrayList<Integer> TS,
                                             FLogicEnvironment oenv) {
         HashSet<Integer> ans;
-        Iterator it;
-        int i;
 
         ans = new HashSet<Integer>();
 
@@ -1492,7 +1078,7 @@ public class FLogicEngine {
     public void getAssertionsBoundPred(String pred, String args[], int arity, String graph, ArrayList<Integer> TS,
                                        FLogicEnvironment oenv) {
         boolean usePredIndex, match;
-        int idx, indexedArg;
+        int indexedArg;
         Iterator it;
         HashSet<Integer> ansDirect, ansMInherit, ansNMInherit;
         ArrayList<String> namesOfClassesWithPred;
@@ -1862,60 +1448,6 @@ public class FLogicEngine {
         classAnsInherit_index.clear();
     }
 
-    public void loadClassesToCache(String fname) {
-        int bitIdx = 0;
-
-        File f = new File(fname);
-        try {
-            BufferedReader bf = new BufferedReader(new FileReader(f));
-            String str;
-            while ((str = bf.readLine()) != null) {
-                if (getOnt().containsKey(str)) {
-                    getClassesToCache().put(getOnt().get(str).getNodeId(), bitIdx++);
-                }
-                if (bitIdx >= FLogicConstants.MAX_ISA_CACHE) {
-                    break;
-                }
-            }
-            bf.close();
-        } catch (IOException ioe) {
-            logger.error(ioe.getMessage(), ioe);
-        }
-    }
-
-    public void init(File ontologyDir) throws IOException {
-        File initFile = new File(ontologyDir, "ontology.init");
-        if (!initFile.exists()) {
-            initFile = new File(ontologyDir, "reasoner.init");
-        }
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(initFile));
-            String line = null;
-            String currentSection = null;
-            while ((line = br.readLine()) != null) {
-                if (line.startsWith("Section:")) {
-                    String section = line.substring(8).trim();
-                    currentSection = section;
-                    continue;
-                }
-                if (line.startsWith("EndSection")) {
-                    currentSection = null;
-                    continue;
-                }
-
-                line = line.trim();
-
-                if ("ontology".equals(currentSection)) {
-                    loadOntology(new File(ontologyDir, line));
-                }
-
-            }
-            br.close();
-        } catch (IOException ioe) {
-            logger.error(ioe.getMessage(), ioe);
-        }
-    }
-
     /// Load content from F-Logic Expressions
     /**
      *
@@ -1951,45 +1483,7 @@ public class FLogicEngine {
         }
     }
 
-    /**
-     *
-     * @param fname
-     * @param oenv
-     */
-    public void loadKB(File file, FLogicEnvironment oenv) {
-        FLogicDriver driver = new FLogicDriver();
-        driver.setFlengine(this);
-        driver.setOenv(oenv);
-        InputStream in = null;
-        try {
-            in = new FileInputStream(file);
-            driver.parse(in);
-        } catch (Exception e) {
-            logger.error("Error while loading file: " + file.getAbsolutePath(), e);
-        } finally {
-            try {
-                in.close();
-            } catch (Throwable t) {
-            }
-        }
-    }
-
-    /**
-     *
-     * @param stmt
-     * @param oenv
-     */
-    public void loadStatement(String stmt, FLogicEnvironment oenv) {
-        FLogicDriver driver = new FLogicDriver();
-        driver.setFlengine(this);
-        driver.setOenv(oenv);
-        try {
-            driver.parse(stmt);
-        } catch (Exception e) {
-            logger.error("Error while loading statement: " + stmt, e);
-        }
-    }
-
+ 
     /**
      *
      * @param goalExpr
@@ -2010,7 +1504,7 @@ public class FLogicEngine {
             e.printStackTrace();
             logger.error("Error while parsing expression: " + goalExpr, e);
         }
-        ;
+        
         if (oenv.getGoals().size() > 0) {
             Goal g = oenv.getGoals().get(0);
             oenv.getGoals().clear();
@@ -2277,7 +1771,7 @@ public class FLogicEngine {
     // Unify with knowledge base
     // Special case unify variables with data
     private void unify(Literal literal, N_ary assertion, BindingSet bindSet, FLogicEnvironment oenv) {
-        int i, j;
+        int i;
         String predLabel;
 
         if (literal.getPredicate().getLabel().equals("<:")) {
@@ -2323,7 +1817,7 @@ public class FLogicEngine {
     }
 
     private Tuple createNewTuple(Goal goal, BindingSet bindSet, ArrayList<String> variables) {
-        int i, j;
+        int i;
         Tuple t;
         boolean fnd;
         String value;
@@ -2355,32 +1849,6 @@ public class FLogicEngine {
         return t;
     }
 
-    private ArrayList<String> produceTrace(Goal curGoal, String hisSrc, FLogicEnvironment oenv) {
-        ArrayList<String> Trace = produceTrace(curGoal, oenv);
-        if (hisSrc.startsWith("D")) {
-            int assrt_id = Integer.parseInt(hisSrc.substring(1));
-            N_ary assrt = oenv.getKB().getAssertion(assrt_id);
-            Trace.add(assrt.toString());
-        }
-        return Trace;
-    }
-
-    private ArrayList<String> produceTrace(Goal curGoal, FLogicEnvironment oenv) {
-        ArrayList<String> Trace = new ArrayList<String>();
-        for (int i = 0; i < curGoal.getHistory().size(); i++) {
-            String hisSrc = curGoal.getHistory().get(i);
-            if (hisSrc.startsWith("D")) {
-                int assrt_id = Integer.parseInt(hisSrc.substring(1));
-                N_ary assrt = oenv.getKB().getAssertion(assrt_id);
-                Trace.add(assrt.toString());
-            } else if (hisSrc.startsWith("R")) {
-                int rule_id = Integer.parseInt(hisSrc.substring(1));
-                HornClause rule = ontoRules.get(rule_id);
-                Trace.add(rule.toString());
-            }
-        }
-        return Trace;
-    }
 
     private void tableResults(Goal origGoal, Tuple tuple, ArrayList<String> queryvars, FLogicEnvironment oenv) {
         String args[], predLabel, graphLabel;
@@ -2535,7 +2003,6 @@ public class FLogicEngine {
             unify(literal, hc.head, bindSet, oenv);
             if (hc.body.size() > 0 || curGoal.getClauses().size() > 1) {
                 extSrc = "R" + id;
-                boolean added = addNewGoal(GS, curGoal.deriveNewGoal(hc, extSrc, bindSet, RS, systemPreds, oenv), oenv);
             } else if (curGoal.getClauses().size() == 1) { // save answer
                 allVarsBound = true;
                 for (i = 0; i < bindSet.getSize() && allVarsBound; i++) {
@@ -2585,7 +2052,6 @@ public class FLogicEngine {
         Tuple tpl;
         int i;
         N_ary nary;
-        ArrayList<N_ary> preds;
         boolean eval = false; // system predicate evaluation defaults to false
         boolean cont;
 
@@ -2780,138 +2246,6 @@ public class FLogicEngine {
         // save if in stream mode
     }
 
-    public class MatchDecision {
-        public int pc, oc;
-        public BindingSet bindings;
-        public ArrayList<Literal> literalsToDelete;
-
-        public MatchDecision(int pc, int oc, BindingSet bSet, ArrayList<Literal> listToDel) {
-            this.pc = pc;
-            this.oc = oc;
-            bindings = new BindingSet();
-            bindings.append(bSet);
-            literalsToDelete = new ArrayList<Literal>();
-            for (Literal lit : listToDel)
-                literalsToDelete.add(lit);
-        }
-    }
-
-    // May 20, 2015 : Match portions of a goal and replace with an optimal
-    // pattern
-    // : Needs to support backtracking
-    // May 21, 2015 : Backtracking add
-    private void rewriteGoal(Goal origGoal, FLogicEnvironment oenv) {
-        int pc = 0, pcLim = 0, oc = 0, ocLim = 0;
-        MatchDecision mDec;
-        Goal cpGoal = null; // copy of original pattern
-        BindingSet bindSet = new BindingSet();
-        BindingSet finalBindSet = new BindingSet();
-        ArrayList<Literal> literalsToDelete = new ArrayList<Literal>();
-        LinkedList<MatchDecision> mdStack = new LinkedList<MatchDecision>();
-        ArrayList<MatchDecision> finalMatches = new ArrayList<MatchDecision>();
-        try {
-            JSONArray patternList = (JSONArray) QueryPatterns.get("Patterns");
-            for (int p = 0; p < patternList.size(); p++) {
-                JSONObject Pattern = (JSONObject) patternList.get(p);
-                String pattern = (String) Pattern.get("pattern");
-                if (pattern.length() > 0)
-                    pattern = "?- " + pattern;
-                Goal pGoal = parseGoal(pattern, oenv);
-                finalBindSet.clear();
-                literalsToDelete.clear();
-                mdStack.clear();
-                boolean match = true;
-                boolean contRewrite = true;
-                if (pGoal == null)
-                    contRewrite = false;
-                else {
-                    pc = 0;
-                    pcLim = pGoal.getClauses().size();
-                    oc = 0;
-                    ocLim = origGoal.getClauses().size();
-                    cpGoal = new Goal();
-                    for (Literal lit : pGoal.getClauses())
-                        cpGoal.getClauses().add(new Literal(lit));
-                }
-                while (contRewrite) {
-                    Literal pLit = cpGoal.getClauses().get(pc); // match this
-                    // literal
-                    Literal oLit = origGoal.getClauses().get(oc);
-                    match = false;
-                    if (oLit.isNegated() == pLit.isNegated()) {
-                        unify(oLit, pLit, bindSet, oenv);
-                        if (bindSet.getSize() > 0) {
-                            // save state for backtracking
-                            mDec = new MatchDecision(pc, oc, finalBindSet, literalsToDelete);
-                            mdStack.addFirst(mDec);
-
-                            // update state
-                            finalBindSet.append(bindSet);
-                            for (int i = pc; i < cpGoal.getClauses().size(); i++)
-                                cpGoal.getClauses().get(i).substituteBindings(bindSet);
-                            literalsToDelete.add(oLit);
-                            match = true;
-                            if (pc == pcLim - 1) {
-                                mDec = new MatchDecision(pc, oc, finalBindSet, literalsToDelete);
-                                finalMatches.add(mDec); // save new completed
-                                // goal
-                            }
-                        }
-                    }
-                    if (match) {
-                        oc = ocLim;
-                    } // start next pattern clause
-                    else
-                        oc++; // move forward
-                    while (true) {
-                        if (oc >= ocLim) {
-                            oc = 0;
-                            pc++;
-                        }
-                        if (pc >= pcLim) {
-                            if (mdStack.size() > 0) { // backtrack
-                                mDec = mdStack.pollFirst();
-                                pc = mDec.pc;
-                                oc = mDec.oc + 1;
-                                finalBindSet.clear();
-                                finalBindSet.append(mDec.bindings);
-                                cpGoal.getClauses().clear();
-                                for (Literal lit : pGoal.getClauses())
-                                    cpGoal.getClauses().add(lit);
-                            } else {
-                                contRewrite = false;
-                                break;
-                            }
-                        } else
-                            break;
-                    }
-                }
-                if (finalMatches.size() > 0) {
-                    MatchDecision md = finalMatches.get(0);
-                    String optimalPattern = (String) Pattern.get("optimal_pattern");
-                    pGoal = parseGoal("?- " + optimalPattern, oenv);
-                    for (int i = 0; i < pGoal.getClauses().size(); i++) {
-                        pGoal.getClauses().get(i).substituteBindings(md.bindings);
-                        origGoal.getClauses().add(pGoal.getClauses().get(i));
-                    }
-                    for (Literal lit : md.literalsToDelete) {
-                        for (int l = 0; l < origGoal.getClauses().size(); l++) {
-                            Literal oLit = origGoal.getClauses().get(l);
-                            if (lit == oLit) {
-                                origGoal.getClauses().remove(l);
-                                break;
-                            }
-                        }
-                    }
-                    origGoal.optimize();
-                    finalMatches.clear();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private boolean addNewGoal(GoalStack GS, Goal g, FLogicEnvironment flenv) {
         if (GS.addNewGoal(g)) {
             if (flenv.executionMode == FLogicConstants.FULL_MODE) {
@@ -2923,8 +2257,6 @@ public class FLogicEngine {
                             ;
                         else {
                             arg = lit.getArgs()[1]; // object
-                            if (arg.getType() == FLogicConstants.VALUE)
-                                ;
                         }
                     }
                 }
@@ -3011,42 +2343,6 @@ public class FLogicEngine {
         return GS;
     }
 
-    // August 10, 2015
-    public void resumeGoal(String fl_goal_id, String goalJSON, String fl_id, ResultSet RS, FLogicEnvironment flenv) {
-        JSONParser jparser = new JSONParser();
-        JSONObject jgoal = null;
-        try {
-            jgoal = (JSONObject) jparser.parse(goalJSON);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        // get the query
-        String query = (String) jgoal.get("Query");
-        Goal goal = parseGoal(query, flenv);
-        goal.setUUID(fl_goal_id);
-        flenv.fl_id = fl_id;
-        // copy bindings
-        JSONArray jbindings = (JSONArray) jgoal.get("Bindings");
-        for (int b = 0; b < jbindings.size(); b++) {
-            JSONObject jbinding = (JSONObject) jbindings.get(b);
-            String src = (String) jbinding.get("src");
-            String dst = (String) jbinding.get("dest");
-            goal.getBindSet().addBinding(src, dst);
-        }
-        // create a new goal
-        GoalStack GS = new GoalStack();
-        GS.addNewGoal(goal);
-        // copy original variables
-        JSONArray jvariables = (JSONArray) jgoal.get("Variables");
-        for (int v = 0; v < jvariables.size(); v++)
-            RS.addVariable((String) jvariables.get(v));
-        // solve goal
-        RS.query = null;
-        solveGoal(goal, RS, GS, flenv);
-    }
-
     // Sept 14, 2010
     // If the 1st literal in origGoal is unbounded then results for that literal
     // are cached in the kb
@@ -3054,10 +2350,8 @@ public class FLogicEngine {
         Goal curGoal;
         BindingSet bindSet;
         Literal lit;
-        boolean match;
-        int i, a, l;
+        int  l;
         Tuple tpl;
-        String extSrc; // source for extending goal, D? or R?
         long st;
 
         st = System.currentTimeMillis(); // start time
@@ -3067,9 +2361,7 @@ public class FLogicEngine {
             oenv.setSkiprest(false);
             lit = null; // Java needs to see this
             curGoal = GS.getTopGoal();
-            if (oenv.executionMode == FLogicConstants.FULL_MODE && curGoal != origGoal) {
-                ;
-            }
+
             if (GS.getInvalidGoals().get(curGoal.getId()) || curGoal.exhaustedChoicePoints()) {
                 GS.removeTopGoal();
             } else {
@@ -3224,7 +2516,7 @@ public class FLogicEngine {
     }
 
     private void getRules(Literal literal, ArrayList<Integer> TS, FLogicEnvironment oenv) {
-        int i, a, ruleIdx;
+        int a, ruleIdx;
         HornClause rule;
         boolean match;
         String predLabel;
@@ -3269,21 +2561,16 @@ public class FLogicEngine {
      * @param oenv
      */
     public void solveGoalLT(Goal curGoalIn, FLogicEnvironment oenv) {
-        Goal curGoal, newGoal, origGoal;
+        Goal curGoal, origGoal;
         GoalStack GS;
         ResultSet curRS;
         BindingSet bindSet;
         Literal literal;
-        long st;
-        String extSrc;
-        ArrayList<String> args;
-        int l, id, i, old_goal_id;
+        int l, old_goal_id;
         int rssize, newrssize;
         Tuple tpl;
 
         old_goal_id = oenv.getGoal_id(); // save for later
-
-        st = System.currentTimeMillis(); // start time
 
         GS = new GoalStack();
         GS.isLT = true;
@@ -3537,13 +2824,7 @@ public class FLogicEngine {
         InferenceRuleSet.clear();
     }
 
-    /**
-     * @return the classesToCache
-     */
-    public Map<Integer, Integer> getClassesToCache() {
-        return classesToCache;
-    }
-
+    
     /**
      * @return the ont
      */
@@ -3566,24 +2847,9 @@ public class FLogicEngine {
     }
 
     /**
-     * @param ontoRulesIndex
-     *            the ontoRulesIndex to set
-     */
-    public void setOntoRulesIndex(StringIndex ontoRulesIndex) {
-        this.ontoRulesIndex = ontoRulesIndex;
-    }
-
-    /**
      * @return the predIndex
      */
     public StringIndex getPredIndex() {
         return predIndex;
-    }
-
-    /**
-     * @return the argsIndex
-     */
-    public StringIndex[] getArgsIndex() {
-        return argsIndex;
     }
 }
