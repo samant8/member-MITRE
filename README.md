@@ -4,7 +4,7 @@ MITRE's contribution to the Analysis Exchange is a reference implementation that
 touches on the development and use of the full spectrum of items needed in an instance of the AE.
 
 This prototype is called **Tangerine**. As of Fall 2017, this version 1.0 of Tangerine supports
-Analysis Excchange Model v1.0.
+Analysis Excchange Model v1.0.0.
 
 ## Getting Started
 
